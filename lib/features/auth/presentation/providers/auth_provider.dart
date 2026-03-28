@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:meetnow_frontend/core/logger/app_logger.dart';
 import 'package:meetnow_frontend/core/network/api_client.dart';
 import 'package:meetnow_frontend/features/auth/data/datasource/auth_local_datasource.dart';
 import 'package:meetnow_frontend/features/auth/data/datasource/auth_remote_datasource.dart';
@@ -49,24 +50,45 @@ class AuthNotifier extends AsyncNotifier<User?> {
   /// 로컬에 토큰이 있으면 서버에서 현재 사용자 정보를 가져옵니다.
   @override
   Future<User?> build() async {
+    appLogger.i('[Auth] 초기화: 저장된 토큰 확인 중...');
     final repo = ref.read(authRepositoryProvider);
     final isLoggedIn = await repo.isLoggedIn();
-    if (!isLoggedIn) return null;
+    if (!isLoggedIn) {
+      appLogger.i('[Auth] 저장된 토큰 없음 → 비로그인 상태');
+      return null;
+    }
 
+    appLogger.i('[Auth] 토큰 존재 → 서버에서 사용자 정보 조회 중...');
     // fold: Left(실패) → null 반환, Right(성공) → User 반환
     final result = await repo.getCurrentUser();
-    return result.fold((failure) => null, (user) => user);
+    return result.fold(
+      (failure) {
+        appLogger.w('[Auth] 사용자 정보 조회 실패: ${failure.message}');
+        return null;
+      },
+      (user) {
+        appLogger.i('[Auth] 자동 로그인 성공: ${user.id}');
+        return user;
+      },
+    );
   }
 
   /// 이메일/비밀번호로 로그인합니다.
   /// 성공 시 state가 [AsyncData(User)]로, 실패 시 [AsyncError]로 변경됩니다.
   Future<void> login({required String email, required String password}) async {
+    appLogger.i('[Auth] 로그인 시도: $email');
     state = const AsyncLoading();
     final repo = ref.read(authRepositoryProvider);
     final result = await repo.login(email: email, password: password);
     state = result.fold(
-      (failure) => AsyncError(failure.message, StackTrace.current),
-      (user) => AsyncData(user),
+      (failure) {
+        appLogger.w('[Auth] 로그인 실패: ${failure.message}');
+        return AsyncError(failure.message, StackTrace.current);
+      },
+      (user) {
+        appLogger.i('[Auth] 로그인 성공: ${user.id}');
+        return AsyncData(user);
+      },
     );
   }
 
@@ -76,6 +98,7 @@ class AuthNotifier extends AsyncNotifier<User?> {
     required String email,
     required String password,
   }) async {
+    appLogger.i('[Auth] 회원가입 시도: $email');
     state = const AsyncLoading();
     final repo = ref.read(authRepositoryProvider);
     final result = await repo.signup(
@@ -84,15 +107,23 @@ class AuthNotifier extends AsyncNotifier<User?> {
       password: password,
     );
     state = result.fold(
-      (failure) => AsyncError(failure.message, StackTrace.current),
-      (user) => AsyncData(user),
+      (failure) {
+        appLogger.w('[Auth] 회원가입 실패: ${failure.message}');
+        return AsyncError(failure.message, StackTrace.current);
+      },
+      (user) {
+        appLogger.i('[Auth] 회원가입 성공: ${user.id}');
+        return AsyncData(user);
+      },
     );
   }
 
   /// 로그아웃합니다. state를 [AsyncData(null)]로 설정해 비로그인 상태로 만듭니다.
   Future<void> logout() async {
+    appLogger.i('[Auth] 로그아웃 처리 중...');
     final repo = ref.read(authRepositoryProvider);
     await repo.logout();
+    appLogger.i('[Auth] 로그아웃 완료');
     state = const AsyncData(null); // 라우터 리다이렉트가 이 변경을 감지해 login 페이지로 이동
   }
 }

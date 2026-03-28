@@ -5,24 +5,26 @@ import 'package:flutter/material.dart';
 /// 인스턴스 생성이 불필요하므로 [abstract class]로 선언합니다.
 /// 모든 색상은 `const`로 컴파일 타임에 결정됩니다.
 abstract class AppColors {
-  // ── 브랜드 주색상 (핑크 계열) ───────────────────────────────────────────────
-  static const Color primary = Color(0xFFFF4D67);
-  static const Color primaryLight = Color(0xFFFF8A9E); // 연한 핑크 (배경, 뱃지 등)
-  static const Color primaryDark = Color(0xFFD6334A); // 진한 핑크 (눌림 효과 등)
+  // ── 브랜드 주색상 (크림슨 로즈 계열) ────────────────────────────────────────
+  // Color.fromARGB(255, 187, 38, 73) = 0xFFBB2649
+  static const Color primary = Color(0xFFBB2649);
+  static const Color primaryLight = Color(0xFFDB6B8B); // 연한 로즈 (배경, 뱃지 등)
+  static const Color primaryDark = Color(0xFF8C1A36); // 진한 크림슨 (눌림 효과 등)
 
-  // ── 보조색상 (보라 계열) ────────────────────────────────────────────────────
-  static const Color secondary = Color(0xFF6C63FF);
-  static const Color secondaryLight = Color(0xFF9D97FF);
-  static const Color secondaryDark = Color(0xFF4A42CC);
+  // ── 보조색상 (애머시스트 퍼플 계열) ─────────────────────────────────────────
+  // primary H=347°에 대한 아날로그 보색 계열 (H=287° ~ 317°)
+  static const Color secondary = Color(0xFF7B4FA0);
+  static const Color secondaryLight = Color(0xFFA67EC8);
+  static const Color secondaryDark = Color(0xFF573375);
 
   // ── 중립 색상 (레이아웃 / 텍스트) ──────────────────────────────────────────
-  static const Color background = Color(0xFFF8F8FA); // 스캐폴드 배경
+  static const Color background = Color(0xFFFDF6F8); // 따뜻한 로즈 화이트 배경
   static const Color surface = Color(0xFFFFFFFF); // 카드, 시트 배경
-  static const Color textPrimary = Color(0xFF1A1A2E);
+  static const Color textPrimary = Color(0xFF1A1425); // 약간 따뜻한 다크
   static const Color textSecondary = Color(0xFF6B7280);
   static const Color textHint = Color(0xFF9CA3AF); // 플레이스홀더 텍스트
-  static const Color border = Color(0xFFE5E7EB);
-  static const Color divider = Color(0xFFF3F4F6);
+  static const Color border = Color(0xFFEAE0E4); // 로즈 틴트 보더
+  static const Color divider = Color(0xFFF5EEF1); // 로즈 틴트 디바이더
 
   // ── 상태 색상 ───────────────────────────────────────────────────────────────
   static const Color success = Color(0xFF10B981); // 성공, 완료

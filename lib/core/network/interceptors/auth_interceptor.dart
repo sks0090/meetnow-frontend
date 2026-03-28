@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:meetnow_frontend/core/constants/app_constants.dart';
+import 'package:meetnow_frontend/core/logger/app_logger.dart';
 
 /// 모든 HTTP 요청에 인증 토큰을 자동으로 주입하는 Dio 인터섭터.
 ///
@@ -24,7 +25,8 @@ class AuthInterceptor extends Interceptor {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
-    handler.next(options); // 다음 인터섭터 또는 실제 요청으로 진행
+    appLogger.d('[HTTP] ${options.method} ${options.uri}');
+    handler.next(options); // 다음 인터셉터 또는 실제 요청으로 진행
   }
 
   /// HTTP 401 좌시 키퍼 만료 처리를 담당합니다.

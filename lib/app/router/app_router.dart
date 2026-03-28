@@ -1,7 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetnow_frontend/core/logger/app_logger.dart';
 import 'package:meetnow_frontend/features/auth/presentation/pages/login_page.dart';
 import 'package:meetnow_frontend/features/auth/presentation/pages/signup_page.dart';
+import 'package:meetnow_frontend/features/splash/presentation/pages/splash_page.dart';
 import 'package:meetnow_frontend/features/auth/presentation/providers/auth_provider.dart';
 import 'package:meetnow_frontend/features/chat/presentation/pages/chat_list_page.dart';
 import 'package:meetnow_frontend/features/chat/presentation/pages/chat_page.dart';
@@ -13,6 +16,7 @@ import 'package:meetnow_frontend/shared/widgets/main_scaffold.dart';
 ///
 /// 문자열을 직접 사용하는 대신 이 클래스의 상수를 참조해 오타를 방지합니다.
 abstract class AppRoutes {
+  static const String splash = '/splash';
   static const String login = '/login';
   static const String signup = '/signup';
   static const String discover = '/discover'; // 메인 탭 1: 상대방 탐색
@@ -31,24 +35,46 @@ final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.discover,
+    initialLocation: AppRoutes.splash,
     // 모든 내비게이션 직전에 실행되는 리다이렉트 로직.
     redirect: (context, state) {
+      // 스플래시 페이지는 리다이렉트하지 않음 (애니메이션 완료 후 자체 이동)
+      if (state.matchedLocation == AppRoutes.splash) return null;
+
       final isLoggedIn = authState.value != null;
       final isAuthRoute = state.matchedLocation == AppRoutes.login ||
           state.matchedLocation == AppRoutes.signup;
 
       // 비로그인 상태에서 인증 페이지 외 접근 시 → 로그인 화면으로
-      if (!isLoggedIn && !isAuthRoute) return AppRoutes.login;
+      if (!isLoggedIn && !isAuthRoute) {
+        appLogger
+            .d('[Router] 비로그인 → ${state.matchedLocation}에서 /login으로 리다이렉트');
+        return AppRoutes.login;
+      }
       // 이미 로그인된 상태에서 인증 페이지 접근 시 → 탐색 화면으로
-      if (isLoggedIn && isAuthRoute) return AppRoutes.discover;
+      if (isLoggedIn && isAuthRoute) {
+        appLogger
+            .d('[Router] 로그인 완료 → ${state.matchedLocation}에서 /discover로 리다이렉트');
+        return AppRoutes.discover;
+      }
       return null; // 리다이렉트 없이 원래 경로로 이동
     },
     routes: [
-      // 인증 라우트 (하단 탭 바 없음)
+      // 스플래시 (MN → MeetNow 애니메이션)
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (context, state) => const SplashPage(),
+      ),
+      // 인증 라우트 (하단 탭 바 없음) — splash에서 페이드 전환
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginPage(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const LoginPage(),
+          transitionDuration: const Duration(milliseconds: 600),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
       ),
       GoRoute(
         path: AppRoutes.signup,

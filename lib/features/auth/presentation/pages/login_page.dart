@@ -1,49 +1,24 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:meetnow_frontend/app/router/app_router.dart';
 import 'package:meetnow_frontend/app/theme/app_colors.dart';
 import 'package:meetnow_frontend/features/auth/presentation/providers/auth_provider.dart';
 import 'package:meetnow_frontend/features/auth/presentation/widgets/social_login_button.dart';
 
 /// 로그인 페이지.
 ///
-/// 이메일+비밀번호 등록 폼 및 소셜 로그인 버튼이 있습니다.
-/// [authStateProvider]를 ref.listen으로 구독하여 에러 나는 경우
+/// 이메일 로그인 없이 소셜 로그인만 제공합니다.
+/// - iOS: 카카오톡 + Apple 로그인
+/// - Android: 카카오톡 + Google 로그인
+///
+/// [authStateProvider]를 ref.listen으로 구독하여 에러 시
 /// SnackBar로 사용자에게 안내합니다.
-class LoginPage extends ConsumerStatefulWidget {
+class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends ConsumerState<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _isLoading = false;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-    await ref.read(authStateProvider.notifier).login(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
-    if (mounted) setState(() => _isLoading = false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(authStateProvider, (prev, next) {
       next.whenOrNull(
         error: (error, _) {
@@ -58,110 +33,80 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'MeetNow',
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Spacer(),
+              // 'Meet'는 primary 색상, 'Now'는 검정색으로 구분합니다.
+              Text.rich(
+                const TextSpan(
                   style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    fontSize: 48,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1.5,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '새로운 만남을 시작하세요',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    hintText: '이메일',
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '이메일을 입력해주세요';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    hintText: '비밀번호',
-                    prefixIcon: Icon(Icons.lock_outline),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '비밀번호를 입력해주세요';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('로그인'),
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => context.push(AppRoutes.signup),
-                  child: const Text('계정이 없으신가요? 회원가입'),
-                ),
-                const SizedBox(height: 32),
-                const Row(
                   children: [
-                    Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'SNS 로그인',
-                        style: TextStyle(color: AppColors.textHint),
+                    TextSpan(
+                      text: 'Meet',
+                      style: TextStyle(
+                        color: AppColors.primary,
                       ),
                     ),
-                    Expanded(child: Divider()),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SocialLoginButton(
-                      icon: Icons.apple,
-                      label: 'Apple',
-                    ),
-                    SizedBox(width: 16),
-                    SocialLoginButton(
-                      icon: Icons.g_mobiledata,
-                      label: 'Google',
+                    TextSpan(
+                      text: 'Now',
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
                     ),
                   ],
                 ),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '새로운 만남을 시작하세요',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const Spacer(),
+              // 카카오톡 로그인 (공통) — 카카오 브랜드 색상(노란색)
+              SocialLoginButton(
+                icon: Icons.chat_bubble,
+                label: '카카오톡으로 시작하기',
+                backgroundColor: const Color(0xFFFEE500),
+                foregroundColor: const Color(0xFF191919),
+                onPressed: () {
+                  // TODO: 카카오톡 로그인 구현
+                },
+              ),
+              const SizedBox(height: 12),
+              // iOS → Apple 로그인(검정), Android → Google 로그인(검정)
+              if (Platform.isIOS)
+                SocialLoginButton(
+                  icon: Icons.apple,
+                  label: 'Apple로 시작하기',
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  onPressed: () {
+                    // TODO: Apple 로그인 구현
+                  },
+                )
+              else
+                SocialLoginButton(
+                  icon: Icons.g_mobiledata,
+                  label: 'Google로 시작하기',
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  onPressed: () {
+                    // TODO: Google 로그인 구현
+                  },
+                ),
+              const SizedBox(height: 48),
+            ],
           ),
         ),
       ),

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meetnow_frontend/core/logger/app_logger.dart';
 import 'package:meetnow_frontend/core/network/api_client.dart';
 import 'package:meetnow_frontend/features/match/data/datasource/match_remote_datasource.dart';
 import 'package:meetnow_frontend/features/match/data/repositories/match_repository_impl.dart';
@@ -12,36 +15,57 @@ final matchRepositoryProvider = Provider<MatchRepository>((ref) {
 });
 
 /// 탐색(Discover) 화면에서 보여줄 프로필 목록을 관리하는 AsyncNotifierProvider.
+///
+/// autoDispose + keepAlive(5분)로 탭 전환 시 스와이프 덱 상태를 유지합니다.
 final discoverProfilesProvider =
-    AsyncNotifierProvider<DiscoverNotifier, List<MatchProfile>>(
+    AsyncNotifierProvider.autoDispose<DiscoverNotifier, List<MatchProfile>>(
   DiscoverNotifier.new,
 );
 
-/// 스와이프 카드 덱의 프로필 목록 상태를 관리하는 AsyncNotifier.
+/// 스와이프 카드 덱의 프로필 목록 상태를 관리하는 AutoDisposeAsyncNotifier.
 ///
 /// 좋아요/싫어요 시 해당 프로필을 제거하고,
 /// 남은 프로필이 3개 미만이면 다음 배치를 자동으로 불러옵니다.
-class DiscoverNotifier extends AsyncNotifier<List<MatchProfile>> {
+/// keepAlive(5분)로 탭 전환 시 현재 덱 상태를 유지합니다.
+class DiscoverNotifier extends AutoDisposeAsyncNotifier<List<MatchProfile>> {
   @override
-  Future<List<MatchProfile>> build() => _fetchProfiles();
+  Future<List<MatchProfile>> build() {
+    // 탭 이동 후 재진입 시 덱 상태 유지 (5분간 캐시)
+    final link = ref.keepAlive();
+    Timer(const Duration(minutes: 5), link.close);
+
+    return _fetchProfiles();
+  }
 
   Future<List<MatchProfile>> _fetchProfiles() async {
+    appLogger.i('[Match] 탐색 프로필 목록 로드 중...');
     final repo = ref.read(matchRepositoryProvider);
     final result = await repo.getDiscoverProfiles();
     return result.fold(
-      (failure) => throw Exception(failure.message),
-      (profiles) => profiles,
+      (failure) {
+        appLogger.w('[Match] 프로필 로드 실패: ${failure.message}');
+        throw Exception(failure.message);
+      },
+      (profiles) {
+        appLogger.i('[Match] 프로필 ${profiles.length}개 로드 완료');
+        return profiles;
+      },
     );
   }
 
   /// 특정 프로필에 좋아요를 누릅니다.
   /// 매칭이 성사되면 true, 아니면 false를 반환합니다.
   Future<bool> likeProfile(String profileId) async {
+    appLogger.i('[Match] 좋아요: $profileId');
     final repo = ref.read(matchRepositoryProvider);
     final result = await repo.likeProfile(profileId);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        appLogger.w('[Match] 좋아요 실패: ${failure.message}');
+        return false;
+      },
       (isMatch) {
+        if (isMatch) appLogger.i('[Match] 매칭 성사! profileId=$profileId');
         _removeTopProfile();
         return isMatch;
       },
@@ -50,6 +74,7 @@ class DiscoverNotifier extends AsyncNotifier<List<MatchProfile>> {
 
   /// 특정 프로필에 싫어요를 누릅니다.
   Future<void> dislikeProfile(String profileId) async {
+    appLogger.i('[Match] 싫어요: $profileId');
     final repo = ref.read(matchRepositoryProvider);
     await repo.dislikeProfile(profileId);
     _removeTopProfile();
