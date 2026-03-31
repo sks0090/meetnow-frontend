@@ -4,8 +4,7 @@
 /// 경로를 변경할 때 이 파일만 수정하면 됩니다.
 abstract class ApiPaths {
   // ── 인증 (Auth) ──────────────────────────────────────────────────────────
-  static const String login = '/auth/login';
-  static const String signup = '/auth/signup';
+  static const String socialLogin = '/auth/social';
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh';
   static const String verifyPhone = '/auth/verify-phone';

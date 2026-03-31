@@ -8,18 +8,11 @@ import 'package:meetnow_frontend/features/auth/data/models/user_model.dart';
 /// 서버에 HTTP 요청을 보내 인증 데이터를 가져오는 메서드를 정의합니다.
 /// 예외를 throw하면 [AuthRepositoryImpl]에서 [Failure]로 매핑합니다.
 abstract class AuthRemoteDataSource {
-  /// 이메일/비밀번호로 로그인합니다.
-  /// 응답 JSON에서 user와 tokens를 함께 반환합니다 (Dart record 타입).
-  Future<({UserModel user, TokenModel tokens})> login({
-    required String email,
-    required String password,
-  });
-
-  /// 신규 회원가입을 요청합니다.
-  Future<({UserModel user, TokenModel tokens})> signup({
-    required String name,
-    required String email,
-    required String password,
+  /// 소셜 로그인을 요청합니다.
+  /// 서버가 provider/token을 받아 인증 후 user + tokens를 반환합니다.
+  Future<({UserModel user, TokenModel tokens})> loginWithSocial({
+    required String provider,
+    required String token,
   });
 
   /// 서버에 로그아웃 요청을 보냅니다. 서버 측 토큰 무효화를 처리합니다.
@@ -39,30 +32,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this._dio);
 
   @override
-  Future<({UserModel user, TokenModel tokens})> login({
-    required String email,
-    required String password,
+  Future<({UserModel user, TokenModel tokens})> loginWithSocial({
+    required String provider,
+    required String token,
   }) async {
     final response = await _dio.post(
-      ApiPaths.login,
-      data: {'email': email, 'password': password},
-    );
-    final data = response.data as Map<String, dynamic>;
-    return (
-      user: UserModel.fromJson(data['user'] as Map<String, dynamic>),
-      tokens: TokenModel.fromJson(data['tokens'] as Map<String, dynamic>),
-    );
-  }
-
-  @override
-  Future<({UserModel user, TokenModel tokens})> signup({
-    required String name,
-    required String email,
-    required String password,
-  }) async {
-    final response = await _dio.post(
-      ApiPaths.signup,
-      data: {'name': name, 'email': email, 'password': password},
+      ApiPaths.socialLogin,
+      data: {'provider': provider, 'token': token},
     );
     final data = response.data as Map<String, dynamic>;
     return (

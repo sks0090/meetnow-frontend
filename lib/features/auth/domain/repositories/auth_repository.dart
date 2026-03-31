@@ -7,14 +7,11 @@ import 'package:meetnow_frontend/features/auth/domain/entities/user.dart';
 /// 실제 구현체([AuthRepositoryImpl]))는 데이터 레이어에 있습니다.
 /// Result는 항상 [ResultFuture]로 반환해 성공/실패를 [Either]로 표현합니다.
 abstract class AuthRepository {
-  /// 이메일/비밀번호로 로그인. 성공 시 로그인한 [User]를 반환합니다.
-  ResultFuture<User> login({required String email, required String password});
-
-  /// 신규 회원가입. 성공 시 생성된 [User]를 반환합니다.
-  ResultFuture<User> signup({
-    required String name,
-    required String email,
-    required String password,
+  /// 소셜 로그인 (카카오, Apple, Google). 성공 시 [User]를 반환합니다.
+  /// 서버 측에서 미가입 사용자는 자동 회원가입 처리됩니다.
+  ResultFuture<User> loginWithSocial({
+    required String provider,
+    required String token,
   });
 
   /// 로그아웃. 로컈 토큰을 삭제하고 서버에 로그아웃을 알립니다.

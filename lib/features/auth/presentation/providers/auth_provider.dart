@@ -73,46 +73,28 @@ class AuthNotifier extends AsyncNotifier<User?> {
     );
   }
 
-  /// 이메일/비밀번호로 로그인합니다.
-  /// 성공 시 state가 [AsyncData(User)]로, 실패 시 [AsyncError]로 변경됩니다.
-  Future<void> login({required String email, required String password}) async {
-    appLogger.i('[Auth] 로그인 시도: $email');
-    state = const AsyncLoading();
-    final repo = ref.read(authRepositoryProvider);
-    final result = await repo.login(email: email, password: password);
-    state = result.fold(
-      (failure) {
-        appLogger.w('[Auth] 로그인 실패: ${failure.message}');
-        return AsyncError(failure.message, StackTrace.current);
-      },
-      (user) {
-        appLogger.i('[Auth] 로그인 성공: ${user.id}');
-        return AsyncData(user);
-      },
-    );
-  }
-
-  /// 신규 회원가입 후 자동 로그인합니다.
-  Future<void> signup({
-    required String name,
-    required String email,
-    required String password,
+  /// 소셜 로그인 (카카오, Apple, Google).
+  ///
+  /// [provider]는 서버가 인식하는 소셜 공급자 식별자입니다.
+  /// [token]은 각 소셜 SDK에서 발급받은 인증 토큰입니다.
+  Future<void> loginWithSocial({
+    required String provider,
+    required String token,
   }) async {
-    appLogger.i('[Auth] 회원가입 시도: $email');
+    appLogger.i('[Auth] 소셜 로그인 시도: $provider');
     state = const AsyncLoading();
     final repo = ref.read(authRepositoryProvider);
-    final result = await repo.signup(
-      name: name,
-      email: email,
-      password: password,
+    final result = await repo.loginWithSocial(
+      provider: provider,
+      token: token,
     );
     state = result.fold(
       (failure) {
-        appLogger.w('[Auth] 회원가입 실패: ${failure.message}');
+        appLogger.w('[Auth] 소셜 로그인 실패: ${failure.message}');
         return AsyncError(failure.message, StackTrace.current);
       },
       (user) {
-        appLogger.i('[Auth] 회원가입 성공: ${user.id}');
+        appLogger.i('[Auth] 소셜 로그인 성공: ${user.id}');
         return AsyncData(user);
       },
     );

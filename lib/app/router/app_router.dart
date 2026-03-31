@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetnow_frontend/core/logger/app_logger.dart';
 import 'package:meetnow_frontend/features/auth/presentation/pages/login_page.dart';
-import 'package:meetnow_frontend/features/auth/presentation/pages/signup_page.dart';
 import 'package:meetnow_frontend/features/splash/presentation/pages/splash_page.dart';
 import 'package:meetnow_frontend/features/auth/presentation/providers/auth_provider.dart';
 import 'package:meetnow_frontend/features/chat/presentation/pages/chat_list_page.dart';
@@ -18,7 +17,6 @@ import 'package:meetnow_frontend/shared/widgets/main_scaffold.dart';
 abstract class AppRoutes {
   static const String splash = '/splash';
   static const String login = '/login';
-  static const String signup = '/signup';
   static const String discover = '/discover'; // 메인 탭 1: 상대방 탐색
   static const String matches = '/matches'; // 매칭된 상대방 목록
   static const String chatList = '/chats'; // 메인 탭 2: 채팅 목록
@@ -42,8 +40,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (state.matchedLocation == AppRoutes.splash) return null;
 
       final isLoggedIn = authState.value != null;
-      final isAuthRoute = state.matchedLocation == AppRoutes.login ||
-          state.matchedLocation == AppRoutes.signup;
+      final isAuthRoute = state.matchedLocation == AppRoutes.login;
 
       // 비로그인 상태에서 인증 페이지 외 접근 시 → 로그인 화면으로
       if (!isLoggedIn && !isAuthRoute) {
@@ -76,10 +73,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           },
         ),
       ),
-      GoRoute(
-        path: AppRoutes.signup,
-        builder: (context, state) => const SignupPage(),
-      ),
+
       // 메인 화면: StatefulShellRoute로 하단 탭 3개를 독립된 내비게이션 스택으로 관리합니다.
       // indexedStack 방식은 탭 전환 시 상태를 유지합니다.
       StatefulShellRoute.indexedStack(

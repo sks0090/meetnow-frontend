@@ -21,14 +21,14 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._remoteDataSource, this._localDataSource);
 
   @override
-  ResultFuture<User> login({
-    required String email,
-    required String password,
+  ResultFuture<User> loginWithSocial({
+    required String provider,
+    required String token,
   }) async {
     try {
-      final result = await _remoteDataSource.login(
-        email: email,
-        password: password,
+      final result = await _remoteDataSource.loginWithSocial(
+        provider: provider,
+        token: token,
       );
       await _localDataSource.saveTokens(
         accessToken: result.tokens.accessToken,
@@ -37,28 +37,6 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(result.user);
     } on UnauthorizedException catch (e) {
       return Left(AuthFailure(message: e.message));
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
-    }
-  }
-
-  @override
-  ResultFuture<User> signup({
-    required String name,
-    required String email,
-    required String password,
-  }) async {
-    try {
-      final result = await _remoteDataSource.signup(
-        name: name,
-        email: email,
-        password: password,
-      );
-      await _localDataSource.saveTokens(
-        accessToken: result.tokens.accessToken,
-        refreshToken: result.tokens.refreshToken,
-      );
-      return Right(result.user);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     }
