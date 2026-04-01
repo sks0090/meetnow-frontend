@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meetnow_frontend/app/app.dart';
 import 'package:meetnow_frontend/app/config/env.dart';
@@ -18,6 +19,10 @@ void main() async {
   // 배포 시에는 Environment.prod로 변경하세요.
   Env.init(Environment.dev);
   appLogger.i('[App] 환경 초기화 완료: ${Env.currentEnv}');
+
+  // 카카오 SDK 초기화. 네이티브 앱 키는 환경별로 관리합니다.
+  KakaoSdk.init(nativeAppKey: Env.kakaoNativeAppKey);
+  appLogger.i('[App] 카카오 SDK 초기화 완료');
 
   // SharedPreferences는 비동기로 초기화되므로 미리 인스턴스를 가져온 뒤
   // Provider에 주입합니다.

@@ -5,6 +5,7 @@ import 'package:meetnow_frontend/core/network/api_client.dart';
 import 'package:meetnow_frontend/features/auth/data/datasource/auth_local_datasource.dart';
 import 'package:meetnow_frontend/features/auth/data/datasource/auth_remote_datasource.dart';
 import 'package:meetnow_frontend/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:meetnow_frontend/features/auth/data/services/social_login_service.dart';
 import 'package:meetnow_frontend/features/auth/domain/entities/user.dart';
 import 'package:meetnow_frontend/features/auth/domain/repositories/auth_repository.dart';
 
@@ -18,6 +19,13 @@ final _authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
 /// 로컬 인증 데이터소스 Provider. [FlutterSecureStorage]를 사용합니다.
 final _authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
   return const AuthLocalDataSourceImpl(FlutterSecureStorage());
+});
+
+// ── 소셜 로그인 서비스 Provider ─────────────────────────────────────────────
+
+/// [SocialLoginService] 인스턴스를 제공하는 Provider.
+final socialLoginServiceProvider = Provider<SocialLoginService>((ref) {
+  return SocialLoginService();
 });
 
 // ── 공개 Repository Provider ──────────────────────────────────────────────────

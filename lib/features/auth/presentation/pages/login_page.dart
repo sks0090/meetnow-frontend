@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meetnow_frontend/app/theme/app_colors.dart';
 import 'package:meetnow_frontend/features/auth/presentation/providers/auth_provider.dart';
 import 'package:meetnow_frontend/features/auth/presentation/widgets/social_login_button.dart';
+import 'package:meetnow_frontend/features/auth/data/services/social_login_service.dart';
 
 /// 로그인 페이지.
 ///
@@ -79,9 +80,9 @@ class LoginPage extends ConsumerWidget {
                 label: '카카오톡으로 시작하기',
                 backgroundColor: const Color(0xFFFEE500),
                 foregroundColor: const Color(0xFF191919),
-                onPressed: () {
-                  // TODO: 카카오톡 로그인 구현
-                },
+                onPressed: () => _loginWith(ref, () {
+                  return ref.read(socialLoginServiceProvider).loginWithKakao();
+                }),
               ),
               const SizedBox(height: 12),
               // iOS → Apple 로그인(검정), Android → Google 로그인(검정)
@@ -91,9 +92,11 @@ class LoginPage extends ConsumerWidget {
                   label: 'Apple로 시작하기',
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
-                  onPressed: () {
-                    // TODO: Apple 로그인 구현
-                  },
+                  onPressed: () => _loginWith(ref, () {
+                    return ref
+                        .read(socialLoginServiceProvider)
+                        .loginWithApple();
+                  }),
                 )
               else
                 SocialLoginButton(
@@ -101,9 +104,11 @@ class LoginPage extends ConsumerWidget {
                   label: 'Google로 시작하기',
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
-                  onPressed: () {
-                    // TODO: Google 로그인 구현
-                  },
+                  onPressed: () => _loginWith(ref, () {
+                    return ref
+                        .read(socialLoginServiceProvider)
+                        .loginWithGoogle();
+                  }),
                 ),
               const SizedBox(height: 48),
             ],
@@ -111,5 +116,24 @@ class LoginPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// 소셜 SDK에서 토큰을 받아 서버에 로그인 요청을 보냅니다.
+  Future<void> _loginWith(
+    WidgetRef ref,
+    Future<SocialLoginResult> Function() getSocialToken,
+  ) async {
+    try {
+      final result = await getSocialToken();
+      await ref.read(authStateProvider.notifier).loginWithSocial(
+            provider: result.provider,
+            token: result.token,
+          );
+    } catch (e) {
+      // SDK 에러(취소 등)는 authStateProvider 에러와 별개로 처리
+      // authStateProvider의 listen이 SnackBar를 표시하지 못하는 경우 대비
+      if (e.toString().contains('취소')) return; // 사용자 취소는 무시
+      rethrow; // 나머지 에러는 상위로 전파 → ref.listen이 처리
+    }
   }
 }

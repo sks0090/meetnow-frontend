@@ -48,4 +48,13 @@ class Env {
   static bool get isDev => _currentEnv == Environment.dev;
   static bool get isStaging => _currentEnv == Environment.staging;
   static bool get isProd => _currentEnv == Environment.prod;
+
+  // ── 외부 SDK 키 (--dart-define으로 빌드 시 주입) ─────────────────────────
+  // 빌드 명령 예: flutter run --dart-define=KAKAO_NATIVE_APP_KEY=abc123
+  //
+  // 값이 없으면 빈 문자열 → KakaoSdk.init()에서 런타임 에러로 조기 발견 가능.
+  // .env 파일이나 소스코드에 실제 값을 커밋하지 마세요.
+
+  static const kakaoNativeAppKey =
+      String.fromEnvironment('0cdcc09df03d33b6f452245b8d40e2c2');
 }
