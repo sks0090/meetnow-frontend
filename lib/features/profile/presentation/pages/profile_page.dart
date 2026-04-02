@@ -37,6 +37,7 @@ class ProfilePage extends ConsumerWidget {
               Center(
                 child: Stack(
                   children: [
+                    // 프로필 메인 사진 — 첫 번째 사진 URL을 표시, 없으면 기본 아이콘
                     CircleAvatar(
                       radius: 56,
                       backgroundImage: profile.photoUrls.isNotEmpty
@@ -49,6 +50,7 @@ class ProfilePage extends ConsumerWidget {
                     Positioned(
                       bottom: 0,
                       right: 0,
+                      // 프로필 사진 우하단 편집 아이콘 오버레이
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
@@ -98,8 +100,9 @@ class ProfilePage extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true, // ListView 내부에서 사용하므로 shrinkWrap 필수
+                physics:
+                    const NeverScrollableScrollPhysics(), // 스크롤은 부모 ListView에 위임
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 8,
@@ -107,6 +110,7 @@ class ProfilePage extends ConsumerWidget {
                 ),
                 itemCount: profile.photoUrls.length + 1,
                 itemBuilder: (context, index) {
+                  // 마지막 아이템 = 사진 추가(+) 버튼
                   if (index == profile.photoUrls.length) {
                     return Container(
                       decoration: BoxDecoration(

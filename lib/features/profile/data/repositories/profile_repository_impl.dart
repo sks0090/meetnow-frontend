@@ -7,7 +7,8 @@ import 'package:meetnow_frontend/features/profile/domain/repositories/profile_re
 
 /// [ProfileRepository] 구현체.
 ///
-/// updateProfile에서는 null이 아닌 필드만 Map에 담아 업데이트합니다.
+/// 데이터소스의 예외를 [ServerFailure]로 변환하여 Either 모나드로 반환합니다.
+/// updateProfile에서는 null이 아닌 필드만 Map에 담아 PATCH 요청으로 업데이트합니다.
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource _remoteDataSource;
 

@@ -6,10 +6,10 @@ import 'package:meetnow_frontend/shared/widgets/common_widgets.dart';
 
 /// 탐색(Discover) 페이지.
 ///
-/// [discoverProfilesProvider]를 구독하여 커드 형태의 프로필을 표시합니다.
-/// 커드 카드는 항상 첫 번째 프로필([profiles.first])이 보이며,
+/// [discoverProfilesProvider]를 구독하여 카드 형태의 프로필을 표시합니다.
+/// 항상 첫 번째 프로필([profiles.first])이 보이며,
 /// 좋아요/싫어요 시 해당 프로필이 목록에서 제거됩니다.
-/// 좋아요가 매칭이 되면 SnackBar로 충에 알림이 표시됩니다.
+/// 좋아요로 매칭이 성사되면 SnackBar로 알림이 표시됩니다.
 class DiscoverPage extends ConsumerWidget {
   const DiscoverPage({super.key});
 
@@ -45,7 +45,7 @@ class DiscoverPage extends ConsumerWidget {
             );
           }
 
-          final profile = profiles.first;
+          final profile = profiles.first; // 항상 덱 맨 위의 카드를 표시
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -85,6 +85,7 @@ class DiscoverPage extends ConsumerWidget {
                           child: Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
+                              // 카드 하단 그라데이션 오버레이 — 텍스트 가독성 확보
                               gradient: LinearGradient(
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
@@ -192,6 +193,10 @@ class DiscoverPage extends ConsumerWidget {
   }
 }
 
+/// 좋아요/싫어요/Super Like 액션용 원형 버튼.
+///
+/// [icon], [color], [size]로 외형을 커스터마이즈하며,
+/// Material 원형 + 그림자로 매칭 앱 스타일의 액션 버튼을 구현합니다.
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final Color color;

@@ -3,10 +3,19 @@ import 'package:meetnow_frontend/core/constants/api_paths.dart';
 import 'package:meetnow_frontend/features/profile/data/models/profile_model.dart';
 
 /// 프로필 API 데이터소스 계약.
+///
+/// 내 프로필 조회/수정, 사진 업로드/삭제 기능을 정의합니다.
 abstract class ProfileRemoteDataSource {
+  /// 내 프로필을 서버에서 가져옵니다.
   Future<ProfileModel> getMyProfile();
+
+  /// 프로필 정보를 부분 수정합니다. [data]에는 변경할 필드만 포함됩니다.
   Future<ProfileModel> updateProfile(Map<String, dynamic> data);
+
+  /// 사진 파일을 업로드하고 서버가 반환한 URL을 반환합니다.
   Future<String> uploadPhoto(String filePath);
+
+  /// [photoId]에 해당하는 사진을 삭제합니다.
   Future<void> deletePhoto(String photoId);
 }
 

@@ -19,6 +19,7 @@ class ChatPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final messagesAsync = ref.watch(messagesProvider(chatId));
+    // 현재 로그인된 사용자 — 내가 보낸 메시지 판별에 사용
     final currentUser = ref.watch(authStateProvider).value;
 
     return Scaffold(
@@ -35,12 +36,13 @@ class ChatPage extends ConsumerWidget {
                   );
                 }
                 return ListView.builder(
-                  reverse: true,
+                  reverse: true, // 최신 메시지가 하단에 위치하도록 역순 배치
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
+                    // 보낸 사람이 나인지 판별 → 오른쪽/왼쪽 정렬 결정
                     final isMe = message.senderId == currentUser?.id;
                     return Align(
                       alignment:
@@ -52,7 +54,8 @@ class ChatPage extends ConsumerWidget {
                           vertical: 10,
                         ),
                         constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.7,
+                          maxWidth: MediaQuery.of(context).size.width *
+                              0.7, // 화면 70% 이내로 말풍선 폭 제한
                         ),
                         decoration: BoxDecoration(
                           color: isMe ? AppColors.primary : AppColors.surface,

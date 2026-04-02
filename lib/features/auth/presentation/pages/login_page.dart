@@ -40,8 +40,8 @@ class LoginPage extends ConsumerWidget {
             children: [
               const Spacer(),
               // 'Meet'는 primary 색상, 'Now'는 검정색으로 구분합니다.
-              Text.rich(
-                const TextSpan(
+              const Text.rich(
+                TextSpan(
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w900,

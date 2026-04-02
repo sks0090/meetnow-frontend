@@ -78,7 +78,7 @@ class MessagesNotifier
     );
   }
 
-  /// 메시지를 전송하고 성공 시 목록 맨 앞에 삽입합니다 (UI에서 새 메시지를 위에 표시 핵).
+  /// 메시지를 전송하고 성공 시 목록 맨 앞에 삽입합니다 (UI에서 최신 메시지를 위에 표시).
   Future<void> sendMessage(String content) async {
     appLogger.i('[Chat] 메시지 전송: chatId=$arg');
     final repo = ref.read(chatRepositoryProvider);

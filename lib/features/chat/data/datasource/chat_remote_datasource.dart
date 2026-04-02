@@ -4,9 +4,16 @@ import 'package:meetnow_frontend/features/chat/data/models/chat_model.dart';
 import 'package:meetnow_frontend/features/chat/data/models/message_model.dart';
 
 /// 채팅 API 데이터소스 계약.
+///
+/// 채팅방 목록 조회, 메시지 페이징 로드, 메시지 전송 기능을 정의합니다.
 abstract class ChatRemoteDataSource {
+  /// 내가 속한 전체 채팅방 목록을 서버에서 가져옵니다.
   Future<List<ChatModel>> getChatList();
+
+  /// [chatId] 채팅방의 메시지를 [page] 단위로 가져옵니다.
   Future<List<MessageModel>> getMessages(String chatId, {int page = 1});
+
+  /// [chatId] 채팅방에 메시지를 전송합니다. [type]은 메시지 유형 (기본: 'text').
   Future<MessageModel> sendMessage({
     required String chatId,
     required String content,

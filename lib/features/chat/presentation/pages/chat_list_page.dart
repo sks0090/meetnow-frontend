@@ -7,8 +7,8 @@ import 'package:meetnow_frontend/shared/widgets/common_widgets.dart';
 
 /// 채팅 목록 페이지.
 ///
-/// [chatListProvider]를 구독하여 반환된 [Chat] 목록을 ListView로 무한 스크롤 표시합니다.
-/// 읽지 않은 메시지가 있는 채팅은 말풍지 배지로 표시됩니다.
+/// [chatListProvider]를 구독하여 반환된 [Chat] 목록을 ListView로 표시합니다.
+/// 읽지 않은 메시지가 있는 채팅은 말풍선 배지로 표시됩니다.
 class ChatListPage extends ConsumerWidget {
   const ChatListPage({super.key});
 

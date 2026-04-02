@@ -51,7 +51,7 @@ class ChatListNotifier extends AutoDisposeAsyncNotifier<List<Chat>> {
     );
   }
 
-  /// 그닉 새로고침 시 호출합니다 (pull-to-refresh 등).
+  /// 수동 새로고침 시 호출합니다 (pull-to-refresh 등).
   Future<void> refresh() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() => _fetchChats());

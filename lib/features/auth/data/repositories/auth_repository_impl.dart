@@ -26,14 +26,17 @@ class AuthRepositoryImpl implements AuthRepository {
     required String token,
   }) async {
     try {
+      // 1) 서버에 소셜 로그인 요청 (provider + token)
       final result = await _remoteDataSource.loginWithSocial(
         provider: provider,
         token: token,
       );
+      // 2) 응답으로 받은 토큰을 로컬 보안 저장소에 저장
       await _localDataSource.saveTokens(
         accessToken: result.tokens.accessToken,
         refreshToken: result.tokens.refreshToken,
       );
+      // 3) 성공 → User 엔티티를 Right로 반환
       return Right(result.user);
     } on UnauthorizedException catch (e) {
       return Left(AuthFailure(message: e.message));
@@ -45,8 +48,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   ResultFuture<void> logout() async {
     try {
-      await _remoteDataSource.logout();
-      await _localDataSource.clearTokens();
+      await _remoteDataSource.logout(); // 서버 측 토큰 무효화
+      await _localDataSource.clearTokens(); // 로컬 토큰 삭제
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
@@ -70,11 +73,14 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   ResultFuture<void> refreshToken() async {
     try {
+      // 1) 로컬에 저장된 리프레시 토큰 읽기
       final token = await _localDataSource.getRefreshToken();
       if (token == null) {
         return const Left(AuthFailure(message: '리프레시 토큰이 없습니다.'));
       }
+      // 2) 서버에 새 토큰 발급 요청
       final newTokens = await _remoteDataSource.refreshToken(token);
+      // 3) 새 토큰을 로컬에 다시 저장
       await _localDataSource.saveTokens(
         accessToken: newTokens.accessToken,
         refreshToken: newTokens.refreshToken,
